@@ -1,0 +1,55 @@
+<launch>
+
+    <param name="use_sim_time" value="true" />
+
+    <!-- 设置地图的配置文件 -->
+    <arg name="map" default="A*.yaml" />	
+
+
+    <!-- 运行地图服务器，并且加载设置的地图-->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find mrobot_navigation)/maps/$(arg map)"/>
+
+    <!-- 运行move_base节点 -->
+ <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find scout_gazebo_sim)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find scout_gazebo_sim)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find scout_gazebo_sim)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find scout_gazebo_sim)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find scout_gazebo_sim)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find scout_gazebo_sim)/config/dwa_local_planner_params.yaml" command="load" />
+  </node>
+     <!-- 运行move_base_flex节点 -->
+  <!-- node name="move_base_flex" pkg="mbf_costmap_nav" type="mbf_costmap_nav" required="true" output="screen">
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/move_base.yaml" command="load" />
+    <rosparam file="$(find mrobot_navigation)/config/mrobot/dwa/dwa_local_planner_params.yaml" command="load" />
+  </node>
+  <node name="move_base_legacy_relay" pkg="mbf_costmap_nav" type="move_base_legacy_relay.py"/ -->
+  
+    <!-- 运行EKF -->
+    <!-- Robot pose ekf 拓展卡尔曼滤波-->
+  <!-- node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf" output="screen">
+    <param name="freq" value="30.0"/>
+    <param name="sensor_timeout" value="2.0"/>
+    <param name="odom_used" value="true"/>
+    <param name="imu_used" value="true"/>
+    <param name="vo_used" value="false"/>
+    <remap from="/imu_data" to="/imu" />
+  </node -->
+
+
+
+
+    <!-- 启动AMCL节点 -->
+    <include file="$(find scout_gazebo_sim)/launch/amcl.launch" />
+
+    <!-- 设置一个/odom与/map之间的静态坐标变换 -->
+    <!-- node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /base_footprint /odom_combined 100" / -->
+
+    <!-- 运行rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find mrobot_navigation)/rviz/nav.rviz"/>
+
+</launch>
